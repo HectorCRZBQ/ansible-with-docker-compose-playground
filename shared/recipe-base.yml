@@ -1,20 +1,168 @@
 ---
-- name: Intro to Ansible Playbooks
+# Playbook para desplegar servidores web en cada nodo y diferentes puertos usando Nginx
+- name: Deploy web server and create custom HTML pages for each node and port
   hosts: all
+  become: yes
 
   tasks:
-  - name: Copy file hosts with permissions
-    ansible.builtin.copy:
-      src: /etc/ansible/hosts
-      dest: /tmp/hosts_ansible
-      mode: '0644'
-  - name: Add the user 'bob'
-    ansible.builtin.user:
-      name: bob
-    become: yes
-    become_method: sudo
-  - name: Upgrade all apt packages
-    apt:
-      force_apt_get: yes
-      upgrade: dist
-    become: yes
+    # Copiamos el archivo de hosts a una ubicación temporal con permisos específicos
+    - name: Copy file hosts with permissions
+      ansible.builtin.copy:
+        src: /etc/ansible/hosts
+        dest: /tmp/hosts_ansible
+        mode: '0644'
+
+    # Añadimos un nuevo usuario llamado 'bob' al sistema
+    - name: Add the user 'bob'
+      ansible.builtin.user:
+        name: bob
+
+    # Actualizamos todos los paquetes a la última versión
+    - name: Upgrade all apt packages
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+
+    # Instalamos Nginx
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    # Creamos un directorio donde se guardarán los archivos del servidor web
+    - name: Create a directory for the web server files
+      ansible.builtin.file:
+        path: /var/www/html
+        state: directory
+        mode: '0755'
+
+    # Adaptamos la página HTML en función del nodo y puerto
+    - name: Create custom HTML pages for each port
+      ansible.builtin.copy:
+        dest: "/var/www/html/index-{{ item }}.html"
+        content: |
+          <html>
+          <head><title>Node Info</title></head>
+          <body>
+          <h1>Bienvenido al {{ inventory_hostname }}</h1>
+          <p>Este nodo esta sirviendo en el puerto {{ item }}</p>
+          </body>
+          </html>
+      loop:
+        - 7001
+        - 7002
+        - 7003
+        - 8001
+        - 8002
+        - 8003
+        - 9001
+        - 9002
+        - 9003
+
+    # Crear el archivo de configuración de Nginx para servir las páginas en diferentes puertos
+    - name: Configure Nginx server blocks
+      ansible.builtin.copy:
+        dest: /etc/nginx/sites-available/custom
+        content: |
+          server {
+              listen 7001;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-7001.html;
+              }
+          }
+
+          server {
+              listen 7002;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-7002.html;
+              }
+          }
+
+          server {
+              listen 7003;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-7003.html;
+              }
+          }
+
+          server {
+              listen 8001;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-8001.html;
+              }
+          }
+
+          server {
+              listen 8002;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-8002.html;
+              }
+          }
+
+          server {
+              listen 8003;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-8003.html;
+              }
+          }
+
+          server {
+              listen 9001;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-9001.html;
+              }
+          }
+
+          server {
+              listen 9002;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-9002.html;
+              }
+          }
+
+          server {
+              listen 9003;
+              server_name {{ inventory_hostname }};
+              location / {
+                  root /var/www/html;
+                  index index-9003.html;
+              }
+          }
+      notify: restart nginx
+
+    # Activamos la configuración de Nginx
+    - name: Enable Nginx configuration
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/custom
+        dest: /etc/nginx/sites-enabled/custom
+        state: link
+      notify: restart nginx
+
+    # Iniciamos Nginx
+    - name: Start Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted

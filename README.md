@@ -54,13 +54,16 @@ ansible_python_interpreter=/usr/bin/python3
 ```
 
 Test conectivity
+
 ```bash
 ansible-inventory --list -y
-ansible all -m ping -u root
-ansible all -a "df -h" -u root
 ```
 
-![alt text](/imagees/image4.png)
+![alt text](/images/image4.png)
+
+```bash
+ansible all -m ping -u root
+```
 
 Sin haber conectado el nodo
 
@@ -69,6 +72,10 @@ Sin haber conectado el nodo
 Tras haber conectado el nodo.
 
 ![alt text](/images/image10.png)
+
+```bash
+ansible all -a "df -h" -u root
+```
 
 Sin haber conectado el nodo
 
@@ -83,12 +90,20 @@ Tras haber conectado el nodo.
 Connect with nodes (ssh password is "password" without quotes):
 ```bash
 ssh root@node1
-ssh root@node2
-ssh root@node3
 ```
 
 ![alt text](/images/image7.png)
+
+```bash
+ssh root@node2
+```
+
 ![alt text](/images/image8.png)
+
+```bash
+ssh root@node3
+```
+
 ![alt text](/images/image9.png)
 
 Shared folder between host machine and control node:
@@ -113,6 +128,8 @@ ansible all -m setup -a 'filter=ansible_default_ipv4'
 
 We test some examples inside a web explorer
 
+---
+
 Node 1 / Server 1
 
  - Port 7001: http://localhost:7001
@@ -124,6 +141,7 @@ Node 1 / Server 1
  - Port 7003: http://localhost:7003
   ![alt text](/images/image17.png)
 
+---
 
 Node 2 / Server 2
 
@@ -136,6 +154,7 @@ Node 2 / Server 2
  - Port 8003: http://localhost:8003
    ![alt text](/images/image20.png)
 
+---
 
 Node 3 / Server 3
 
@@ -160,5 +179,5 @@ docker ps
 
 And thats all!!
 
-## **Autor**: [HectorCRZBQ](https://github.com/HectorCRZBQ)
+### **Autor**: [HectorCRZBQ](https://github.com/HectorCRZBQ)
 
